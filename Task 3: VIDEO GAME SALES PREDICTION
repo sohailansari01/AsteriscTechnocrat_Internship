@@ -1,0 +1,86 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+df = pd.read_csv('../input/videogamesales/vgsales.csv')
+df.head()
+df.shape
+df.isnull().sum()
+df.info()
+df.describe()
+top_videogames = df[['Rank', 'Name', 'Global_Sales']].groupby('Name').sum().sort_values(by='Global_Sales', ascending=False)
+top_videogames.head(10)
+ax = top_videogames.head(10).plot(kind='bar', figsize=(12, 7), title='Global Sales Per Name')
+for p in ax.patches:
+    ax.annotate(str(p.get_height()), (p.get_x() + p.get_width() / 2, p.get_height()), rotation=90, ha='center', va='bottom')
+plt.show()
+top_rank = df[['Rank', 'Name',]].groupby('Name').sum().sort_values(by='Rank', ascending=True)
+top_rank.head(10)
+ax = top_rank.head(10).plot(kind='bar', figsize=(12, 7), title='Top 10 Rank Video Games')
+for p in ax.patches:
+    ax.annotate(str(p.get_height()), (p.get_x() + p.get_width() / 2, p.get_height()), ha='center', va='bottom')
+plt.show()
+top_platform = df[['Platform', 'Global_Sales',]].groupby('Platform').sum().sort_values(by='Platform', ascending=True)
+top_platform.head(10).plot(kind='pie', subplots=True, figsize=(12,10),title='Global Sales per Platform',autopct='%1.0f%%')
+df['Year'].plot(kind='hist',bins=50, figsize=(12,7),title='G Release Distribution')
+df['Genre'].value_counts()
+plt.figure(figsize=(12, 7))
+plt.title('Selling Games by Genre')
+sns.countplot(data=df, x='Genre', order=df['Genre'].value_counts().index, palette='Set2')
+plt.show()
+comp = df[['Genre', 'NA_Sales', 'EU_Sales', 'JP_Sales']]
+comp_map = comp.groupby(by=['Genre']).sum()
+plt.figure(figsize=(12, 7))
+sns.set(font_scale=1)
+sns.heatmap(comp_map, annot=True, fmt = '.1f')
+
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
+
+plt.show()
+comp_table = comp_map.reset_index()
+comp_table = pd.melt(comp_table, id_vars=['Genre'], value_vars=['NA_Sales', 'EU_Sales', 'JP_Sales'], var_name='Sale_Area', value_name='Sale_Price')
+comp_table.head()
+plt.figure(figsize=(12, 7))
+sns.barplot(data=comp_table, x='Sale_Area', y='Sale_Price', hue='Genre')
+plt.title('Sales by Genre and Area')
+plt.xlabel('Sale Area')
+plt.ylabel('Sales')
+
+plt.show()
+comp_platform = df[['Platform', 'NA_Sales', 'EU_Sales', 'JP_Sales']]
+comp_platform.head()
+comp_platform = comp_platform.groupby(by=['Platform']).sum().reset_index()
+comp_platform = pd.melt(comp_platform, id_vars=['Platform'], value_vars=['NA_Sales', 'EU_Sales', 'JP_Sales'], var_name='Sale_Area', value_name='Sale_Price')
+comp_platform.head()
+plt.figure(figsize=(12, 7))
+sns.barplot(data=comp_platform, x='Platform', y='Sale_Price', hue='Sale_Area')
+plt.title('Sales by Area and Platform')
+plt.xlabel('Platform')
+plt.ylabel('Sales')
+plt.xticks(rotation=90)
+plt.show()
+top10_platform = df['Platform'].value_counts().sort_values(ascending=False).head(10)
+import plotly.express as px
+fig = px.line(top10_platform, title='TOP 10 PLATFORM',
+             labels={
+                    'value':"Count",
+                    'index':"Name of Platform"
+             })
+fig.show()
+rank_publisher = df.groupby(by=['Publisher'])['Year'].count().sort_values(ascending=False).head(10)
+rank_publisher = pd.DataFrame(rank_publisher).reset_index()
+plt.figure(figsize=(12, 7))
+sns.countplot(x="Publisher", data=df, order=df.groupby(by=['Publisher'])['Year'].count().sort_values(ascending=False).iloc[:10].index)
+plt.xticks(rotation=90)
+
+plt.show()
+sale_other = df.groupby(by=['Publisher'])['Other_Sales'].count().sort_values(ascending=False).head(10)
+sale_other = pd.DataFrame(sale_other).reset_index()
+sale_other = df.groupby(by=['Publisher'])['Other_Sales'].count().sort_values(ascending=False).head(10)
+sale_other = pd.DataFrame(sale_other).reset_index()
+plt.figure(figsize=(12, 7))
+sns.barplot(x="Publisher", y="Other_Sales", data=sale_other)
+plt.xticks(rotation=90)
+
+plt.show()
