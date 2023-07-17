@@ -1,0 +1,78 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from wordcloud import WordCloud, STOPWORDS
+
+import warnings
+warnings.filterwarnings('ignore')
+df = pd.read_csv('../input/forbes-billionaires-data-preprocessed/Forbes Billionaires.csv')
+df.head()
+df.shape
+df.info()
+df.describe()
+df.isnull().sum()
+plt.figure(figsize=(20,8))
+sns.countplot( data=df, x="Country", order=df['Country'].value_counts().index)
+plt.xticks(rotation=90)
+plt.ylabel("No of Billionaires", fontsize=15)
+plt.xlabel("Countries", fontsize=15)
+plt.title("No of Billionaires from all the countries", fontsize=20)
+plt.show()
+df['Country'].value_counts().nlargest(10)
+plt.figure(figsize=(15,15))
+sns.barplot(data=df, x = "Networth", y = "Country", order = df['Country'].value_counts().index, estimator = sum , errwidth = 0)
+plt.xticks(rotation=90)
+plt.xlabel("Networth", fontsize=15)
+plt.ylabel("Countries", fontsize=15)
+plt.show()
+plt.figure(figsize = (15,8))
+sns.histplot(data = df, x = 'Age', color = 'peru')
+plt.title('Age distribution of the billionaires',fontsize=20)
+plt.show()
+df.loc[df.Age == df.Age.min()]
+df['age_group'] = pd.cut(df['Age'], bins = [18, 30, 50, 70, 100], include_lowest = True, labels = ['18-30', '30-50', '50-70','70+'])
+df.head()
+df['age_group'].value_counts().plot(kind='bar', figsize=(9,6))
+plt.xlabel("Age Group", fontsize=15)
+plt.ylabel("Billionaires Count", fontsize=15)
+plt.show()
+plt.figure(figsize=(15,8))
+sns.barplot(data=df, x = "Networth", y = "Industry", order = df['Industry'].value_counts().index, estimator = sum , errwidth = 0)
+plt.xticks(rotation=90)
+plt.xlabel("Networth", fontsize=15)
+plt.ylabel("Industries", fontsize=15)
+plt.show()
+stopwords = set(STOPWORDS)
+text = " ".join(i for i in df.Source) 
+
+plt.figure( figsize=(15,10))
+wordcloud = WordCloud(
+                      stopwords=stopwords,
+                      max_words=200,
+                      max_font_size=50, 
+                      random_state=50
+                     ).generate(text)
+
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis('off');
+plt.show();
+indians = df[df['Country'] == 'India']
+top_5_indians = indians.sort_values('Networth',ascending=False).head()
+explode = [0.1, 0.01, 0, 0, 0]
+# define Seaborn color palette to use
+palette_color = sns.color_palette('dark')
+  
+# plotting data on chart
+plt.pie(top_5_indians['Networth'], labels=top_5_indians['Name'], colors=palette_color,
+        explode=explode, autopct='%.0f%%')
+  
+# displaying chart
+plt.show()
+us_df = df[df['Country'] == 'United States'].sort_values('Networth',ascending=False).head()
+us_df
+plt.pie(us_df['Networth'], labels=us_df['Name'], colors=palette_color,
+        explode=explode, autopct='%.0f%%')
+  
+# displaying chart
+plt.show()
